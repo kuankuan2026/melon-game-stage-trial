@@ -6,12 +6,35 @@
 <title>植日生｜點陣風樣板</title>
 <link rel="stylesheet" href="art-test.css?v=art-install-1">
 <script src="gameData.js?v=art-install-1" defer></script>
-<script src="plants.js?v=art-install-1" defer></script>
+<script src="plants.js?v=art-install-2" defer></script>
 <script src="snail.js?v=art-install-1" defer></script>
 <script src="plant.js?v=art-install-1" defer></script>
 <script src="mascots.js?v=art-install-1" defer></script>
 <script src="guanguan.js?v=art-install-1" defer></script>
 <script src="boss.js?v=art-install-1" defer></script>
+<style>
+#plant-extra h3 {
+  color: var(--deep);
+  font-size: 17px;
+  margin: 12px 0 6px;
+}
+.plant-extra-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+  gap: 8px;
+}
+.plant-extra-grid figure {
+  display: grid;
+  grid-template-rows: 115px auto;
+  place-items: center;
+  padding: 6px 0;
+  background: #e9efd8;
+  text-align: center;
+}
+.plant-extra-grid canvas {
+  image-rendering: pixelated;
+}
+</style>
 </head>
 <body>
 <header class="top"><div><strong>植日生</strong><span>洋香瓜遊戲</span></div><a href="#palette">看色票</a></header>
@@ -105,6 +128,15 @@
 <figure><canvas data-sample-plant="smallLeaf" aria-hidden="true"></canvas><figcaption>小葉</figcaption></figure>
 <figure><canvas data-sample-plant="largeLeaf" aria-hidden="true"></canvas><figcaption>大葉</figcaption></figure>
 </div></section>
+<section class="panel" id="plant-extra" aria-labelledby="plant-extra-title">
+<h2 id="plant-extra-title">植株附加狀態（5 倍）</h2>
+<h3>咬痕與小蟲</h3>
+<div class="plant-extra-grid" data-leaf-extra="bitten"></div>
+<h3>白粉病斑</h3>
+<div class="plant-extra-grid" data-leaf-extra="spotted"></div>
+<h3>嚴重白粉病斑</h3>
+<div class="plant-extra-grid" data-leaf-extra="spotted_severe"></div>
+</section>
 <section class="panel" id="bosses"><h2>頭目立繪</h2>
 <div class="examples bosses">
 <figure><div class="portrait snail"><canvas width="56" height="56" data-snail="normal" aria-hidden="true"></canvas></div><figcaption>蝸牛大王</figcaption></figure>
@@ -139,6 +171,21 @@ document.addEventListener("DOMContentLoaded", () => {
     const wrapper=document.createElement("div");
     wrapper.innerHTML=StageArt.plant({...sample,...states[marker.dataset.samplePlant]});
     marker.replaceWith(wrapper);
+  }
+  const leafVariants = {healthy: "健康葉", weak: "弱勢葉", small: "小葉", large: "大葉"};
+  for (const grid of document.querySelectorAll("[data-leaf-extra]")) {
+    for (const [variant, label] of Object.entries(leafVariants)) {
+      const figure = document.createElement("figure");
+      const canvas = document.createElement("canvas");
+      canvas.setAttribute("aria-hidden", "true");
+      drawPlantSprite(canvas, PLANT_EXTRA[`leaf_${grid.dataset.leafExtra}_${variant}`]);
+      canvas.style.width = `${canvas.width * 5}px`;
+      canvas.style.height = `${canvas.height * 5}px`;
+      const caption = document.createElement("figcaption");
+      caption.textContent = label;
+      figure.append(canvas, caption);
+      grid.append(figure);
+    }
   }
   StageArt.mount(document);
   for (const canvas of document.querySelectorAll("[data-boss-gg]")) {
