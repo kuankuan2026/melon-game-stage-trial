@@ -1,0 +1,32 @@
+/* SVG 立繪：階段關卡 98～110列。葉片依實際數量繪製。 */
+const StageArt=(()=>{
+ const R=D.rules;
+ const leaf=(x,y,angle,scale,color,spot,bite,bug)=>'<g transform="translate('+x+' '+y+') rotate('+angle+') scale('+scale+')"><path d="M0 0 Q-22 -22 -39 -13 Q-55 -38 -27 -45 Q-14 -62 0 -42 Q15 -63 30 -44 Q57 -37 39 -13 '+(bite?'L25 -19 Q13 -8 31 -7':'')+' Q20 -19 0 0Z" fill="'+color+'" stroke="#456d3c" stroke-width="1.2"/><path d="M0 0L0 -41M0 -8L-28 -29M0 -8L28 -29" fill="none" stroke="#e3ebba" opacity=".45" stroke-width="1.5"/>'+ (spot?'<g fill="#fff9df" opacity=".9"><circle cx="-14" cy="-26" r="7"/><circle cx="15" cy="-36" r="5"/><circle cx="25" cy="-18" r="4"/></g>':'')+(bug?'<g fill="#332a26"><ellipse cx="-12" cy="-18" rx="2" ry="4"/><ellipse cx="12" cy="-30" rx="2" ry="4"/></g>':'')+'</g>';
+ const flower=(x,y,s=1)=>'<g transform="translate('+x+' '+y+') scale('+s+')">'+[0,72,144,216,288].map(a=>'<ellipse cx="0" cy="-8" rx="5" ry="10" fill="#f4c44f" transform="rotate('+a+')"/>').join('')+'<circle r="5" fill="#a46d27"/></g>';
+ function plant(s,compact=false){
+  const n=s.leaves||0,strong=s.vigor>=s.cap*.7,weak=s.vigor<s.cap*.4,droop=s.root<30, double=s.training==='double',color=weak?'#a6b35c':strong?'#498347':'#75a55b',trunks=double&&s.doubleStarted?2:1, h=Math.min(172,Math.max(32,24+n*(s.leggy?8:6))),base=206;
+  let out='<svg class="plant" viewBox="0 0 360 240" role="img" aria-label="洋香瓜植株，'+n+'片葉"><defs><linearGradient id="fieldSky" x2="0" y2="1"><stop stop-color="#f6f5de"/><stop offset="1" stop-color="#d5e3c1"/></linearGradient></defs><rect width="360" height="240" rx="12" fill="url(#fieldSky)"/><path d="M8 210V53L86 12H274L352 53V210 M86 12V210 M274 12V210 M8 53H352" stroke="#a3b5a0" stroke-width="2" fill="none"/><path d="M0 210Q180 193 360 210V240H0Z" fill="#b29670"/><ellipse cx="180" cy="216" rx="135" ry="13" fill="#927651"/>';
+  for(let k=0;k<trunks;k++){
+   let x=trunks===2?138+k*84:180, count=trunks===2?Math.floor((n+1-k)/2):n,top=base-h;
+   out+='<path d="M'+x+' 18V'+base+'" stroke="#a7b4a0" stroke-dasharray="3 4"/><path d="M180 '+base+' Q'+x+' '+(base-18)+' '+x+' '+top+'" fill="none" stroke="'+color+'" stroke-width="'+(strong?6:weak?2.5:4)+'" stroke-linecap="round"/>';
+   for(let i=0;i<count;i++){
+    const yy=base-12-(h-10)*i/Math.max(1,count),xx=x+(i%2?3:-3),angle=(i%2?55:-55)+(droop?(i%2?80:-80):0),scale=(n<5?.48:.59)*(s.leggy?1.13:1);
+    out+=leaf(xx,yy,angle,scale,color,s.disease>=R.diseaseTrigger&&i%4===0,s.snailBite&&i%3===0,s.pests>=R.pestTrigger&&i%3===0);
+   }
+  }
+  if(s.planted){for(let i=0;i<5;i++)out+='<path d="M180 207 Q'+(168+i*7)+' 222 '+(150+i*14)+' '+(230-(i%2)*7)+'" stroke="'+(droop?'#a38a61':'#e7d5a8')+'" fill="none" stroke-width="1.6"/>'}
+  if(s.missing)out+='<ellipse cx="82" cy="217" rx="12" ry="5" fill="#4d3f2d"/><text x="82" y="200" text-anchor="middle" font-size="10" fill="#644e35">缺株</text>';
+  if(s.broken)out+='<path d="M180 130L210 141L204 147L240 184" stroke="#8b8250" stroke-width="4" fill="none"/>'+leaf(240,184,170,.5,'#b0a66b',false,false,false);
+  if(s.weed>=R.weedTrigger)for(let i=0;i<s.weed*3;i++){let x=18+(i*57)%320;out+='<path d="M'+x+' 218q-14 -20 -9 -24q12 10 9 24q2 -25 11 -28q-1 16 -11 28" stroke="#638045" stroke-width="2" fill="none"/>'}
+  if(s.stage===2||s.fruit!==null){out+=flower(210,110,.78);if(s.fruit)out+='<path d="M210 111Q235 121 229 143" stroke="#568044" stroke-width="3" fill="none"/><ellipse cx="230" cy="157" rx="13" ry="18" fill="#8ab95f" stroke="#4e8445" stroke-width="2"/>';if(s.fruit===false)out+=flower(218,218,.6)+flower(249,224,.45)}
+  if(s.virus>=40)out+='<g fill="#c1cd74" opacity=".7"><circle cx="174" cy="142" r="5"/><circle cx="182" cy="150" r="4"/></g>';
+  return out+'</svg>';
+ }
+ function boss(id){
+  const wrap=x=>'<svg class="bossArt" viewBox="0 0 300 220" role="img" aria-label="'+D.bosses[id].name+'">'+x+'</svg>';
+  if(id==='B-1')return wrap('<ellipse cx="150" cy="197" rx="108" ry="12" fill="#000" opacity=".22"/><path d="M39 171Q29 190 87 190H240Q269 181 251 153L243 106L223 107L220 146Q169 120 135 153Z" fill="#b3ba62" stroke="#516b3a" stroke-width="4"/><circle cx="127" cy="113" r="66" fill="#ae784b" stroke="#704e36" stroke-width="5"/><path d="M127 113C148 84 172 126 128 137C82 149 68 78 121 68C175 54 207 125 161 158" stroke="#6e482c" stroke-width="9" stroke-linecap="round" fill="none"/><path d="M225 117L214 58M247 116L269 57" stroke="#7b9a4d" stroke-width="8" stroke-linecap="round"/><circle cx="214" cy="58" r="15" fill="#ffffd8"/><circle cx="269" cy="57" r="15" fill="#ffffd8"/><circle cx="218" cy="61" r="7" fill="#272d26"/><circle cx="265" cy="60" r="7" fill="#272d26"/><path d="M232 139q11 11 23 0" stroke="#4b5431" stroke-width="4" fill="none"/><path d="M86 51L78 21L112 35L132 7L150 35L182 21L170 51Z" fill="#e4b848" stroke="#997533" stroke-width="3"/>');
+  if(id==='B-3')return wrap('<ellipse cx="150" cy="199" rx="93" ry="12" fill="#000" opacity=".2"/><path d="M147 198C31 173 250 117 142 49M142 163C82 175 42 135 50 76M158 143C231 152 263 91 246 46" fill="none" stroke="#538749" stroke-width="18" stroke-linecap="round"/><path d="M109 61Q102 14 148 8Q190 19 185 67Q213 99 180 122Q148 151 118 121Q84 97 109 61Z" fill="#71a451" stroke="#385c37" stroke-width="4"/><path d="M121 77L142 88L120 92M178 77L157 88L179 92" stroke="#2b4933" stroke-width="5" fill="#f5efc2"/><path d="M134 108Q148 97 165 108" stroke="#324c31" stroke-width="5" fill="none"/>'+leaf(51,95,-30,.9,'#7eab5b',false,false,false)+leaf(242,88,30,.9,'#7eab5b',false,false,false)+leaf(148,34,0,.65,'#8cb35b',false,false,false));
+  return wrap('<ellipse cx="150" cy="200" rx="104" ry="12" fill="#000" opacity=".2"/><path d="M45 49Q122 -4 229 37Q299 69 240 116Q213 140 172 132Q230 177 83 199Q143 154 69 130Q-7 98 45 49Z" fill="#a4c5d2" stroke="#557e90" stroke-width="4"/><path d="M28 68Q119 32 223 67M46 95Q149 60 268 93M93 135Q170 162 135 182" fill="none" stroke="#e7f4f6" stroke-width="10" stroke-linecap="round"/><path d="M105 68L131 83L107 94M201 68L175 83L200 94" stroke="#3e5d6a" stroke-width="6" fill="none"/><path d="M138 111Q152 103 168 113" stroke="#3e5d6a" stroke-width="5" fill="none"/>'+flower(35,160,.7)+flower(264,145,.65));
+ }
+ return {plant,boss};
+})();
