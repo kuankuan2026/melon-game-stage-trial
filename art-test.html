@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>植日生｜點陣風樣板</title>
+<link rel="stylesheet" href="art-test.css">
+<script src="sprites.js" defer></script>
+</head>
+<body>
+<header class="top"><div><strong>植日生</strong><span>洋香瓜遊戲</span></div><a href="#palette">看色票</a></header>
+<main>
+<section class="hero" aria-labelledby="title">
+<div class="hero-copy"><p class="kicker">溫室裡的植日生</p><h1 id="title">點陣風樣板</h1></div>
+<canvas class="scene" width="320" height="84" data-sprite="field" aria-hidden="true"></canvas>
+<div class="lineup" aria-label="四位角色">
+<figure><canvas width="32" height="32" data-sprite="guaji" aria-hidden="true"></canvas><figcaption>瓜吉<small>開局與旁白</small></figcaption></figure>
+<figure><canvas width="32" height="32" data-sprite="tomato" aria-hidden="true"></canvas><figcaption>歡茄<small>高分喝采</small></figcaption></figure>
+<figure><canvas width="32" height="32" data-sprite="garlic" aria-hidden="true"></canvas><figcaption>蒜淘<small>打工與暖場</small></figcaption></figure>
+<figure><canvas width="32" height="32" data-sprite="zucchini" aria-hidden="true"></canvas><figcaption>櫛客<small>提醒與分析</small></figcaption></figure>
+</div>
+</section>
+<div class="grid">
+<section class="panel" aria-labelledby="dialog-title"><h2 id="dialog-title">對話、字型與按鈕</h2>
+<div class="speech"><canvas width="32" height="32" data-sprite="guaji" aria-hidden="true"></canvas><div><strong>瓜吉</strong><p>今天陽光剛剛好，我陪你去溫室看看小苗。</p></div></div>
+<div class="controls"><a class="button primary" href="#plants">看看瓜苗</a><a class="button secondary" href="#bosses">看看頭目</a><button type="button" disabled>金幣不足</button></div>
+<div class="type"><strong>今天來種瓜</strong><span>翻土拌肥　幼苗期　金幣 1000</span><small>俐方體 11 號衍生字型</small></div>
+</section>
+<section class="panel teacher"><h2>冠冠小教室</h2><figure><canvas width="32" height="32" data-sprite="kuan" aria-hidden="true"></canvas><figcaption>農夫冠冠</figcaption></figure><p>草帽、綠帽沿、白背心、藍褲子。</p></section>
+</div>
+<section class="panel" id="plants"><h2>植株狀態</h2>
+<div class="examples plants">
+<figure><canvas width="32" height="32" data-sprite="healthy" aria-hidden="true"></canvas><figcaption>健康</figcaption></figure>
+<figure><canvas width="32" height="32" data-sprite="weak" aria-hidden="true"></canvas><figcaption>生長勢弱</figcaption></figure>
+<figure><canvas width="32" height="32" data-sprite="droop" aria-hidden="true"></canvas><figcaption>萎垂</figcaption></figure>
+<figure><canvas width="32" height="32" data-sprite="smallLeaf" aria-hidden="true"></canvas><figcaption>小葉</figcaption></figure>
+<figure><canvas width="32" height="32" data-sprite="largeLeaf" aria-hidden="true"></canvas><figcaption>大葉</figcaption></figure>
+</div></section>
+<section class="panel" id="bosses"><h2>頭目立繪</h2>
+<div class="examples bosses">
+<figure><div class="portrait snail"><canvas width="64" height="64" data-sprite="snail" aria-hidden="true"></canvas></div><figcaption>蝸牛大王</figcaption></figure>
+<figure><div class="portrait harvest"><canvas width="64" height="64" data-sprite="finalKuan" aria-hidden="true"></canvas></div><figcaption>最終大魔王冠冠<small>採收評鑑立繪草案</small></figcaption></figure>
+</div></section>
+<section class="panel" id="palette"><h2>品牌色票</h2><ul class="swatches">
+<li><i style="--swatch:#3D9257"></i><span>品牌深綠</span><small>#3D9257</small></li>
+<li><i style="--swatch:#3BB254"></i><span>鮮綠</span><small>#3BB254</small></li>
+<li><i style="--swatch:#A8D175"></i><span>瓜吉淺綠</span><small>#A8D175</small></li>
+<li><i style="--swatch:#DDECB3"></i><span>網紋淡綠</span><small>#DDECB3</small></li>
+<li><i style="--swatch:#FABF0D"></i><span>品牌黃</span><small>#FABF0D</small></li>
+<li><i style="--swatch:#FAC93C"></i><span>小花黃</span><small>#FAC93C</small></li>
+<li><i style="--swatch:#F5F2A3"></i><span>瓜蒂淡黃</span><small>#F5F2A3</small></li>
+<li><i style="--swatch:#EA5A5A"></i><span>番茄紅</span><small>#EA5A5A</small></li>
+<li><i style="--swatch:#FFF4CC"></i><span>蒜淘米白</span><small>#FFF4CC</small></li>
+<li><i style="--swatch:#D96E68"></i><span>腮紅</span><small>#D96E68</small></li>
+<li><i style="--swatch:#1A1A1A"></i><span>外框黑</span><small>#1A1A1A</small></li>
+<li><i style="--swatch:#FFFFFF"></i><span>底白</span><small>#FFFFFF</small></li>
+</ul></section>
+<footer>植日生洋香瓜遊戲 · <a href="art-font-OFL.txt">字型授權</a></footer>
+</main>
+</body>
+</html>
