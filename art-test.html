@@ -6,10 +6,52 @@
 <title>植日生｜點陣風樣板</title>
 <link rel="stylesheet" href="art-test.css">
 <script src="sprites.js" defer></script>
+<script src="mascots.js" defer></script>
 </head>
 <body>
 <header class="top"><div><strong>植日生</strong><span>洋香瓜遊戲</span></div><a href="#palette">看色票</a></header>
 <main>
+<section class="panel mascots" aria-labelledby="mascots-title">
+<h2 id="mascots-title">吉祥物</h2>
+<section class="mascot-scale" aria-labelledby="mascot-scale-2">
+<h3 id="mascot-scale-2">2 倍</h3>
+<h4>淺黃</h4>
+<div class="mascot-row mascot-light" style="--mascot-row-height:96px">
+<figure><figcaption>瓜吉</figcaption><canvas width="48" height="45" data-mascot="guaji" style="--mascot-width:96px;--mascot-height:90px" aria-hidden="true"></canvas></figure>
+<figure><figcaption>歡茄</figcaption><canvas width="48" height="41" data-mascot="tomato" style="--mascot-width:96px;--mascot-height:82px" aria-hidden="true"></canvas></figure>
+<figure><figcaption>蒜淘</figcaption><canvas width="48" height="45" data-mascot="garlic" style="--mascot-width:96px;--mascot-height:90px" aria-hidden="true"></canvas></figure>
+<figure><figcaption>櫛客</figcaption><canvas width="25" height="48" data-mascot="zucchini" style="--mascot-width:50px;--mascot-height:96px" aria-hidden="true"></canvas></figure>
+</div>
+<h4>深綠</h4>
+<div class="mascot-row mascot-green" style="--mascot-row-height:96px">
+<figure><figcaption>瓜吉</figcaption><canvas width="48" height="45" data-mascot="guaji" style="--mascot-width:96px;--mascot-height:90px" aria-hidden="true"></canvas></figure>
+<figure><figcaption>歡茄</figcaption><canvas width="48" height="41" data-mascot="tomato" style="--mascot-width:96px;--mascot-height:82px" aria-hidden="true"></canvas></figure>
+<figure><figcaption>蒜淘</figcaption><canvas width="48" height="45" data-mascot="garlic" style="--mascot-width:96px;--mascot-height:90px" aria-hidden="true"></canvas></figure>
+<figure><figcaption>櫛客</figcaption><canvas width="25" height="48" data-mascot="zucchini" style="--mascot-width:50px;--mascot-height:96px" aria-hidden="true"></canvas></figure>
+</div>
+</section>
+<section class="mascot-scale" aria-labelledby="mascot-scale-3">
+<h3 id="mascot-scale-3">3 倍</h3>
+<h4>淺黃</h4>
+<div class="mascot-row mascot-light" style="--mascot-row-height:144px">
+<figure><figcaption>瓜吉</figcaption><canvas width="48" height="45" data-mascot="guaji" style="--mascot-width:144px;--mascot-height:135px" aria-hidden="true"></canvas></figure>
+<figure><figcaption>歡茄</figcaption><canvas width="48" height="41" data-mascot="tomato" style="--mascot-width:144px;--mascot-height:123px" aria-hidden="true"></canvas></figure>
+<figure><figcaption>蒜淘</figcaption><canvas width="48" height="45" data-mascot="garlic" style="--mascot-width:144px;--mascot-height:135px" aria-hidden="true"></canvas></figure>
+<figure><figcaption>櫛客</figcaption><canvas width="25" height="48" data-mascot="zucchini" style="--mascot-width:75px;--mascot-height:144px" aria-hidden="true"></canvas></figure>
+</div>
+<h4>深綠</h4>
+<div class="mascot-row mascot-green" style="--mascot-row-height:144px">
+<figure><figcaption>瓜吉</figcaption><canvas width="48" height="45" data-mascot="guaji" style="--mascot-width:144px;--mascot-height:135px" aria-hidden="true"></canvas></figure>
+<figure><figcaption>歡茄</figcaption><canvas width="48" height="41" data-mascot="tomato" style="--mascot-width:144px;--mascot-height:123px" aria-hidden="true"></canvas></figure>
+<figure><figcaption>蒜淘</figcaption><canvas width="48" height="45" data-mascot="garlic" style="--mascot-width:144px;--mascot-height:135px" aria-hidden="true"></canvas></figure>
+<figure><figcaption>櫛客</figcaption><canvas width="25" height="48" data-mascot="zucchini" style="--mascot-width:75px;--mascot-height:144px" aria-hidden="true"></canvas></figure>
+</div>
+</section>
+<div class="mascot-dialogue">
+<canvas width="48" height="45" data-mascot="guaji" style="--mascot-width:144px;--mascot-height:135px" aria-hidden="true"></canvas>
+<p>我是瓜吉，今天也一起顧瓜吧！</p>
+</div>
+</section>
 <section class="hero" aria-labelledby="title">
 <div class="hero-copy"><p class="kicker">溫室裡的植日生</p><h1 id="title">點陣風樣板</h1></div>
 <canvas class="scene" width="320" height="84" data-sprite="field" aria-hidden="true"></canvas>
@@ -57,5 +99,12 @@
 </ul></section>
 <footer>植日生洋香瓜遊戲 · <a href="art-font-OFL.txt">字型授權</a></footer>
 </main>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  for (const canvas of document.querySelectorAll("[data-mascot]")) {
+    drawMascot(canvas, canvas.dataset.mascot);
+  }
+});
+</script>
 </body>
 </html>
