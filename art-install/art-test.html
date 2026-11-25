@@ -12,6 +12,71 @@
 <script src="mascots.js?v=art-install-1" defer></script>
 <script src="guanguan.js?v=art-install-1" defer></script>
 <script src="boss.js?v=art-install-1" defer></script>
+<script src="boss_vine.js" defer></script>
+<script src="boss_wind.js" defer></script>
+<style>
+.boss-scenes {
+  --scene-scale: 2;
+  --scene-width: calc(180px * var(--scene-scale));
+  --scene-height: calc(320px * var(--scene-scale));
+  --sprite-size: 112px;
+}
+.boss-scenes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--scene-width)), var(--scene-width)));
+  justify-content: center;
+  gap: 12px;
+}
+.boss-scene {
+  min-width: 0;
+  overflow-x: auto;
+  background: #e9efd8;
+  outline: 1px solid var(--rule);
+}
+.boss-scene h3 {
+  margin: 0;
+  padding: 6px 4px;
+  color: var(--deep);
+  text-align: center;
+  font-size: 16px;
+}
+.boss-scene-stage {
+  position: relative;
+  width: var(--scene-width);
+  height: var(--scene-height);
+}
+.boss-scene-stage img {
+  display: block;
+  width: var(--scene-width);
+  height: var(--scene-height);
+  image-rendering: pixelated;
+}
+.boss-scene-poses {
+  display: grid;
+  grid-template-columns: repeat(3, var(--sprite-size));
+  justify-content: space-evenly;
+  text-align: center;
+}
+.boss-scene-stage .boss-scene-poses {
+  position: absolute;
+  inset: 46% 0 auto;
+}
+.boss-scene-poses canvas {
+  width: var(--sprite-size);
+  height: var(--sprite-size);
+  image-rendering: pixelated;
+}
+.boss-scene-labels {
+  width: var(--scene-width);
+  padding-block: 5px;
+  font-size: 14px;
+}
+@media (min-width: 1180px) {
+  .boss-scenes {
+    margin-inline: calc((100% - 1140px) / 2);
+  }
+}
+</style>
 </head>
 <body>
 <header class="top"><div><strong>植日生</strong><span>洋香瓜遊戲</span></div><a href="#palette">看色票</a></header>
@@ -111,6 +176,47 @@
 <figure><div class="portrait snail"><canvas width="56" height="56" data-snail="defeated" aria-hidden="true"></canvas></div><figcaption>倒下</figcaption></figure>
 <figure><div class="portrait snail"><canvas width="56" height="56" data-snail="fled" aria-hidden="true"></canvas></div><figcaption>逃走</figcaption></figure>
 </div></section>
+<section class="panel boss-scenes" id="boss-scenes" aria-labelledby="boss-scenes-title">
+<h2 id="boss-scenes-title">溫室場景與頭目</h2>
+<div class="boss-scenes-grid">
+<section class="boss-scene" aria-labelledby="boss-scene-day">
+<h3 id="boss-scene-day">日間溫室・徒長藤魔</h3>
+<div class="boss-scene-stage">
+<img src="bg/greenhouse_day.png?v=3" width="180" height="320" alt="">
+<div class="boss-scene-poses" data-scene-boss="vine">
+<canvas width="56" height="56" data-pose="normal" aria-hidden="true"></canvas>
+<canvas width="56" height="56" data-pose="defeated" aria-hidden="true"></canvas>
+<canvas width="56" height="56" data-pose="fled" aria-hidden="true"></canvas>
+</div>
+</div>
+<div class="boss-scene-poses boss-scene-labels"><span>登場</span><span>打倒</span><span>逃走</span></div>
+</section>
+<section class="boss-scene" aria-labelledby="boss-scene-night">
+<h3 id="boss-scene-night">夜間溫室・蝸牛大王</h3>
+<div class="boss-scene-stage">
+<img src="bg/greenhouse_night.png?v=3" width="180" height="320" alt="">
+<div class="boss-scene-poses" data-scene-boss="snail">
+<canvas width="56" height="56" data-pose="normal" aria-hidden="true"></canvas>
+<canvas width="56" height="56" data-pose="defeated" aria-hidden="true"></canvas>
+<canvas width="56" height="56" data-pose="fled" aria-hidden="true"></canvas>
+</div>
+</div>
+<div class="boss-scene-poses boss-scene-labels"><span>登場</span><span>打倒</span><span>逃走</span></div>
+</section>
+<section class="boss-scene" aria-labelledby="boss-scene-outside">
+<h3 id="boss-scene-outside">溫室外・落花風妖</h3>
+<div class="boss-scene-stage">
+<img src="bg/greenhouse_outside.png?v=3" width="180" height="320" alt="">
+<div class="boss-scene-poses" data-scene-boss="wind">
+<canvas width="56" height="56" data-pose="normal" aria-hidden="true"></canvas>
+<canvas width="56" height="56" data-pose="defeated" aria-hidden="true"></canvas>
+<canvas width="56" height="56" data-pose="fled" aria-hidden="true"></canvas>
+</div>
+</div>
+<div class="boss-scene-poses boss-scene-labels"><span>登場</span><span>打倒</span><span>逃走</span></div>
+</section>
+</div>
+</section>
 <section class="panel" id="palette"><h2>品牌色票</h2><ul class="swatches">
 <li><i style="--swatch:#3D9257"></i><span>品牌深綠</span><small>#3D9257</small></li>
 <li><i style="--swatch:#3BB254"></i><span>鮮綠</span><small>#3BB254</small></li>
@@ -139,6 +245,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const wrapper=document.createElement("div");
     wrapper.innerHTML=StageArt.plant({...sample,...states[marker.dataset.samplePlant]});
     marker.replaceWith(wrapper);
+  }
+  const drawSceneBoss = {vine: drawBossVine, snail: drawSnail, wind: drawBossWind};
+  for (const group of document.querySelectorAll("[data-scene-boss]")) {
+    const draw = drawSceneBoss[group.dataset.sceneBoss];
+    for (const canvas of group.querySelectorAll("[data-pose]")) draw(canvas, canvas.dataset.pose);
   }
   StageArt.mount(document);
   for (const canvas of document.querySelectorAll("[data-boss-gg]")) {
