@@ -7,11 +7,82 @@
 <link rel="stylesheet" href="art-test.css?v=art-install-1">
 <script src="gameData.js?v=art-install-1" defer></script>
 <script src="plants.js?v=art-install-1" defer></script>
-<script src="snail.js?v=art-install-1" defer></script>
+<script src="snail.js?v=character-redraw-1" defer></script>
 <script src="plant.js?v=art-install-1" defer></script>
 <script src="mascots.js?v=art-install-1" defer></script>
-<script src="guanguan.js?v=art-install-1" defer></script>
-<script src="boss.js?v=art-install-1" defer></script>
+<script src="guanguan.js?v=character-redraw-1" defer></script>
+<script src="boss.js?v=character-redraw-1" defer></script>
+<style>
+.redraw-preview {
+  --redraw-width: 168px;
+  --redraw-height: 168px;
+}
+.guanguan-demo.redraw-preview {
+  --redraw-width: 132px;
+}
+.boss-demo.redraw-preview {
+  --redraw-height: 192px;
+  margin-inline: 0;
+}
+.redraw-tiles, .redraw-phases {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+.redraw-tiles figure {
+  display: grid;
+  grid-template-rows: var(--redraw-height) auto;
+  justify-items: stretch;
+  gap: 0;
+  padding: 0;
+  background: #e9efd8;
+  text-align: center;
+}
+.redraw-tiles figure.redraw-reference {
+  background: #fff;
+}
+.redraw-tiles img, .redraw-preview .redraw-tiles canvas {
+  display: block;
+  width: var(--redraw-width);
+  height: var(--redraw-height);
+  margin: 0;
+}
+.redraw-preview .redraw-tiles canvas {
+  image-rendering: pixelated;
+}
+.redraw-tiles img {
+  object-fit: contain;
+}
+.redraw-tiles figcaption {
+  padding-block: 4px;
+  background: #e9efd8;
+}
+.redraw-phases section {
+  background: #e9efd8;
+  padding: 8px;
+}
+.redraw-phases h3 {
+  margin: 0 0 6px;
+  color: var(--deep);
+  font-size: 16px;
+  text-align: center;
+}
+.redraw-phases .boss-demo-hp {
+  margin: 5px auto 0;
+}
+.redraw-phases section:nth-child(2) .boss-demo-hp {
+  background: #EA5A5A;
+}
+.redraw-phases .boss-demo-hp .divider {
+  padding: 0;
+  z-index: 0;
+}
+.redraw-preview .redraw-note {
+  margin-top: 10px;
+  text-align: center;
+}
+</style>
 </head>
 <body>
 <header class="top"><div><strong>植日生</strong><span>洋香瓜遊戲</span></div><a href="#palette">看色票</a></header>
@@ -57,28 +128,76 @@
 <p>我是瓜吉，今天也一起顧瓜吧！</p>
 </div>
 </section>
-<section class="panel guanguan-demo" aria-labelledby="guanguan-demo-title">
+<div id="character-redraw-preview">
+<section class="panel guanguan-demo redraw-preview" aria-labelledby="guanguan-demo-title">
 <h2 id="guanguan-demo-title">冠冠小教室</h2>
-<div class="mascot-dialogue">
+<div class="redraw-tiles">
+<figure class="redraw-reference">
+<img src="../art-refs/v2/char_guanguan.jpg" alt="戴漁夫帽的農夫冠冠揮手">
+<figcaption>參考圖</figcaption>
+</figure>
+<figure>
 <canvas width="44" height="56" data-guanguan aria-hidden="true"></canvas>
-<p>我是冠冠，有問題舉手問我！</p>
+<figcaption>農夫冠冠</figcaption>
+</figure>
 </div>
+<p class="redraw-note">我是冠冠，有問題舉手問我！</p>
 </section>
-<section class="panel boss-demo" aria-labelledby="boss-demo-title">
+<section class="panel boss-demo redraw-preview" aria-labelledby="boss-demo-title">
 <h2 id="boss-demo-title">最終大魔王：終焉農夫・筋肉魔導冠皇GG改</h2>
-<div class="boss-demo-grid">
-<figure>
-<figcaption>一階段</figcaption>
-<canvas width="56" height="64" data-boss-gg="1" aria-hidden="true"></canvas>
-<div class="boss-demo-hp"><span>第一條血</span></div>
+<div class="redraw-phases">
+<section aria-labelledby="redraw-phase-1">
+<h3 id="redraw-phase-1">一階段</h3>
+<div class="redraw-tiles">
+<figure class="redraw-reference">
+<img src="../art-refs/v2/boss_gg_phase1.jpg" alt="戴耳機、穿網紋瓜白背心的一階段">
+<figcaption>參考圖</figcaption>
 </figure>
 <figure>
-<figcaption>二階段</figcaption>
+<canvas width="56" height="64" data-boss-gg="1" aria-hidden="true"></canvas>
+<figcaption>點陣圖</figcaption>
+</figure>
+</div>
+<div class="boss-demo-hp"><span>第一條血</span></div>
+</section>
+<section aria-labelledby="redraw-phase-2">
+<h3 id="redraw-phase-2">二階段</h3>
+<div class="redraw-tiles">
+<figure class="redraw-reference">
+<img src="../art-refs/v2/boss_gg_phase2.jpg" alt="長出紅角、穿破牛仔短褲的二階段">
+<figcaption>參考圖</figcaption>
+</figure>
+<figure>
 <canvas width="56" height="64" data-boss-gg="2" aria-hidden="true"></canvas>
+<figcaption>點陣圖</figcaption>
+</figure>
+</div>
 <div class="boss-demo-hp"><span>第二條血</span></div>
+</section>
+</div>
+</section>
+<section class="panel redraw-preview" id="bosses" aria-labelledby="snail-redraw-title">
+<h2 id="snail-redraw-title">蝸牛大王</h2>
+<div class="redraw-tiles">
+<figure class="redraw-reference">
+<img src="../art-refs/v2/boss_snail_B1.jpg" alt="戴金皇冠、背著網紋洋香瓜殼的蝸牛大王">
+<figcaption>參考圖</figcaption>
+</figure>
+<figure>
+<canvas width="56" height="56" data-snail="normal" aria-hidden="true"></canvas>
+<figcaption>登場／戰鬥</figcaption>
+</figure>
+<figure>
+<canvas width="56" height="56" data-snail="defeated" aria-hidden="true"></canvas>
+<figcaption>打倒</figcaption>
+</figure>
+<figure>
+<canvas width="56" height="56" data-snail="fled" aria-hidden="true"></canvas>
+<figcaption>逃走</figcaption>
 </figure>
 </div>
 </section>
+</div>
 <section class="hero" aria-labelledby="title">
 <div class="hero-copy"><p class="kicker">溫室裡的植日生</p><h1 id="title">點陣風樣板</h1></div>
 
@@ -104,12 +223,6 @@
 <figure><canvas data-sample-plant="droop" aria-hidden="true"></canvas><figcaption>萎垂</figcaption></figure>
 <figure><canvas data-sample-plant="smallLeaf" aria-hidden="true"></canvas><figcaption>小葉</figcaption></figure>
 <figure><canvas data-sample-plant="largeLeaf" aria-hidden="true"></canvas><figcaption>大葉</figcaption></figure>
-</div></section>
-<section class="panel" id="bosses"><h2>頭目立繪</h2>
-<div class="examples bosses">
-<figure><div class="portrait snail"><canvas width="56" height="56" data-snail="normal" aria-hidden="true"></canvas></div><figcaption>蝸牛大王</figcaption></figure>
-<figure><div class="portrait snail"><canvas width="56" height="56" data-snail="defeated" aria-hidden="true"></canvas></div><figcaption>倒下</figcaption></figure>
-<figure><div class="portrait snail"><canvas width="56" height="56" data-snail="fled" aria-hidden="true"></canvas></div><figcaption>逃走</figcaption></figure>
 </div></section>
 <section class="panel" id="palette"><h2>品牌色票</h2><ul class="swatches">
 <li><i style="--swatch:#3D9257"></i><span>品牌深綠</span><small>#3D9257</small></li>
