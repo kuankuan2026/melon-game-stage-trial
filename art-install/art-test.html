@@ -16,19 +16,20 @@
 <script src="boss_wind.js" defer></script>
 <style>
 .boss-scenes {
-  --scene-scale: 1;
-  --scene-width: calc(180px * var(--scene-scale));
-  --scene-height: calc(320px * var(--scene-scale));
-  --sprite-size: calc(56px * var(--scene-scale));
+  --scene-scale: 4;
+  --scene-width: calc(90px * var(--scene-scale));
+  --scene-height: calc(160px * var(--scene-scale));
+  --sprite-size: 112px;
 }
 .boss-scenes-grid {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--scene-width)), var(--scene-width)));
   justify-content: center;
   gap: 12px;
 }
 .boss-scene {
-  width: var(--scene-width);
+  min-width: 0;
+  overflow-x: auto;
   background: #e9efd8;
   outline: 1px solid var(--rule);
 }
@@ -41,6 +42,7 @@
 }
 .boss-scene-stage {
   position: relative;
+  width: var(--scene-width);
   height: var(--scene-height);
 }
 .boss-scene-stage img {
@@ -65,12 +67,12 @@
   image-rendering: pixelated;
 }
 .boss-scene-labels {
+  width: var(--scene-width);
   padding-block: 5px;
   font-size: 14px;
 }
 @media (min-width: 1180px) {
   .boss-scenes {
-    --scene-scale: 2;
     margin-inline: calc((100% - 1140px) / 2);
   }
 }
@@ -180,7 +182,7 @@
 <section class="boss-scene" aria-labelledby="boss-scene-day">
 <h3 id="boss-scene-day">日間溫室・徒長藤魔</h3>
 <div class="boss-scene-stage">
-<img src="bg/greenhouse_day.png" width="180" height="320" alt="">
+<img src="bg/greenhouse_day.png?v=2" width="90" height="160" alt="">
 <div class="boss-scene-poses" data-scene-boss="vine">
 <canvas width="56" height="56" data-pose="normal" aria-hidden="true"></canvas>
 <canvas width="56" height="56" data-pose="defeated" aria-hidden="true"></canvas>
@@ -192,7 +194,7 @@
 <section class="boss-scene" aria-labelledby="boss-scene-night">
 <h3 id="boss-scene-night">夜間溫室・蝸牛大王</h3>
 <div class="boss-scene-stage">
-<img src="bg/greenhouse_night.png" width="180" height="320" alt="">
+<img src="bg/greenhouse_night.png?v=2" width="90" height="160" alt="">
 <div class="boss-scene-poses" data-scene-boss="snail">
 <canvas width="56" height="56" data-pose="normal" aria-hidden="true"></canvas>
 <canvas width="56" height="56" data-pose="defeated" aria-hidden="true"></canvas>
@@ -204,7 +206,7 @@
 <section class="boss-scene" aria-labelledby="boss-scene-outside">
 <h3 id="boss-scene-outside">溫室外・落花風妖</h3>
 <div class="boss-scene-stage">
-<img src="bg/greenhouse_outside.png" width="180" height="320" alt="">
+<img src="bg/greenhouse_outside.png?v=2" width="90" height="160" alt="">
 <div class="boss-scene-poses" data-scene-boss="wind">
 <canvas width="56" height="56" data-pose="normal" aria-hidden="true"></canvas>
 <canvas width="56" height="56" data-pose="defeated" aria-hidden="true"></canvas>
