@@ -4,7 +4,7 @@ const StageArt=(()=>{
  const leaf=(x,y,angle,scale,color,spot,bite,bug)=>'<g transform="translate('+x+' '+y+') rotate('+angle+') scale('+scale+')"><path d="M0 0 Q-22 -22 -39 -13 Q-55 -38 -27 -45 Q-14 -62 0 -42 Q15 -63 30 -44 Q57 -37 39 -13 '+(bite?'L25 -19 Q13 -8 31 -7':'')+' Q20 -19 0 0Z" fill="'+color+'" stroke="#456d3c" stroke-width="1.2"/><path d="M0 0L0 -41M0 -8L-28 -29M0 -8L28 -29" fill="none" stroke="#e3ebba" opacity=".45" stroke-width="1.5"/>'+ (spot?'<g fill="#fff9df" opacity=".9"><circle cx="-14" cy="-26" r="7"/><circle cx="15" cy="-36" r="5"/><circle cx="25" cy="-18" r="4"/></g>':'')+(bug?'<g fill="#332a26"><ellipse cx="-12" cy="-18" rx="2" ry="4"/><ellipse cx="12" cy="-30" rx="2" ry="4"/></g>':'')+'</g>';
  const flower=(x,y,s=1)=>'<g transform="translate('+x+' '+y+') scale('+s+')">'+[0,72,144,216,288].map(a=>'<ellipse cx="0" cy="-8" rx="5" ry="10" fill="#f4c44f" transform="rotate('+a+')"/>').join('')+'<circle r="5" fill="#a46d27"/></g>';
  function plant(s,compact=false){
-  const n=s.leaves||0,strong=s.vigor>=s.cap*.7,weak=s.vigor<s.cap*.4,droop=s.root<30, double=s.training==='double',color=weak?'#a6b35c':strong?'#498347':'#75a55b',trunks=double&&s.doubleStarted?2:1, h=Math.min(172,Math.max(32,24+n*(s.leggy?8:6))),base=206;
+  const n=s.leaves||0,strong=s.vigor>=s.cap*R.strongRatio,weak=s.vigor<s.cap*R.weakRatio,droop=s.root<R.droopRoot, double=s.training==='double',color=weak?'#a6b35c':strong?'#498347':'#75a55b',trunks=double&&s.doubleStarted?2:1, h=Math.min(172,Math.max(32,24+n*(s.leggy?8:6))),base=206;
   let out='<svg class="plant" viewBox="0 0 360 240" role="img" aria-label="洋香瓜植株，'+n+'片葉"><defs><linearGradient id="fieldSky" x2="0" y2="1"><stop stop-color="#f6f5de"/><stop offset="1" stop-color="#d5e3c1"/></linearGradient></defs><rect width="360" height="240" rx="12" fill="url(#fieldSky)"/><path d="M8 210V53L86 12H274L352 53V210 M86 12V210 M274 12V210 M8 53H352" stroke="#a3b5a0" stroke-width="2" fill="none"/><path d="M0 210Q180 193 360 210V240H0Z" fill="#b29670"/><ellipse cx="180" cy="216" rx="135" ry="13" fill="#927651"/>';
   for(let k=0;k<trunks;k++){
    let x=trunks===2?138+k*84:180, count=trunks===2?Math.floor((n+1-k)/2):n,top=base-h;
@@ -19,7 +19,7 @@ const StageArt=(()=>{
   if(s.broken)out+='<path d="M180 130L210 141L204 147L240 184" stroke="#8b8250" stroke-width="4" fill="none"/>'+leaf(240,184,170,.5,'#b0a66b',false,false,false);
   if(s.weed>=R.weedTrigger)for(let i=0;i<s.weed*3;i++){let x=18+(i*57)%320;out+='<path d="M'+x+' 218q-14 -20 -9 -24q12 10 9 24q2 -25 11 -28q-1 16 -11 28" stroke="#638045" stroke-width="2" fill="none"/>'}
   if(s.stage===2||s.fruit!==null){out+=flower(210,110,.78);if(s.fruit)out+='<path d="M210 111Q235 121 229 143" stroke="#568044" stroke-width="3" fill="none"/><ellipse cx="230" cy="157" rx="13" ry="18" fill="#8ab95f" stroke="#4e8445" stroke-width="2"/>';if(s.fruit===false)out+=flower(218,218,.6)+flower(249,224,.45)}
-  if(s.virus>=40)out+='<g fill="#c1cd74" opacity=".7"><circle cx="174" cy="142" r="5"/><circle cx="182" cy="150" r="4"/></g>';
+  if(s.virus>=R.virusVisible)out+='<g fill="#c1cd74" opacity=".7"><circle cx="174" cy="142" r="5"/><circle cx="182" cy="150" r="4"/></g>';
   return out+'</svg>';
  }
  function boss(id){

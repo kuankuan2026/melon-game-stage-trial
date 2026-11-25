@@ -60,14 +60,40 @@ function failure(reason,teaching,id){
  s.fail={reason,teaching,id};if(id)s.log.push({id,title:reason,stage:s.stage,score:null,changes:{},impact:-1000,detail:teaching});
  screen('end');
 }
+function plantFailure(){
+ const leafLoss=s.planted&&s.leaves===0;
+ const cause=[...s.log].reverse().find(entry=>entry.changes?.[leafLoss?'leaves':s.root===0?'root':'vigor']<0);
+ if(leafLoss&&cause?.id==='1-4'){
+  failure('苗被啃光了',D.bosses['B-1'].lesson,'C-6');return;
+ }
+ const reason=leafLoss?'葉片掉光了':s.root===0?'根系撐不住了':'植株沒力了';
+ const work=cause?.title??'上一項工作';
+ failure(reason,'看看「'+work+'」的結果。出現田間警訊時，先顧根系、生長勢和健康葉片。','C-6');
+}
 function checkHealth(){
  if(s.view==='end')return true;
- let low=[];if(s.vigor<R.low)low.push('vigor');if(s.root<R.low)low.push('root');
- if(s.planted&&((s.stage>0&&area()<R.low)||s.leaves===0))low.push('leaves');
+ const values={vigor:s.vigor,root:s.root,leaves:area()};
+ const openingVigor=s.checkpoint?.vigor ?? s.stageStart.vigor;
+ const declined=s.rescueDeclined??{};
+ const low=Object.keys(values).filter(key=>{
+  if(key==='leaves'&&(!s.planted||(s.stage===0&&s.leaves>0)))return false;
+  if(values[key]>=R.low){
+   delete declined[key];
+   return false;
+  }
+  if(values[key]===0)return true;
+  if(key==='vigor'&&s.stage===0&&openingVigor<R.low&&!s.openingVigorDeclined){
+   const before=s.taskBefore?.vigor??openingVigor;
+   if(s.vigor<before&&s.view!=='period')s.openingVigorDeclined=true;
+   else return false;
+  }
+  return declined[key]===undefined||values[key]<declined[key];
+ });
+ s.rescueDeclined=declined;
  if(!low.length)return false;
- const zero=low.some(k=>s[k]<=0);
+ const zero=low.some(key=>values[key]===0);
  if(s.rescueUsed<R.rescueCount){s.rescueKeys=low;s.rescueReturn=s.view;screen('rescue');return true}
- if(zero){failure(s.stage===0?'苗被啃光了':'植株撐不住了','根系、生長勢與健康葉片都要顧，出現警訊時別拖。','C-6');return true}
+ if(zero){plantFailure();return true}
  return false;
 }
 function begin(){
@@ -76,14 +102,14 @@ function begin(){
  s={version:D.version,stage:0,season,cultivar:c,soil:R.soil,training:'single',doubleStarted:false,planted:false,vigor:round(cap*R.initialVigor),cap,root:R.root,leaves:0,pests:field[0],disease:field[1],virus:R.virusStart,weed:R.weedStart,coins:R.coins,set:0,tstem:true,halfSet:false,brixCap:D.brixByStar[D.cultivars[c][1]],fruit:null,broken:false,leggy:false,missing:false,snailBite:false,extraLeaves:0,flags:{},log:[],stageResults:[],retryUsed:0,rescueUsed:0,jobLast:null,forms:{},deferred:{pests:0,disease:0},fail:null};
  beginStage();
 }
-function grow(n){if(s.broken){s.extraLeaves=0;return}delta({leaves:n+s.extraLeaves});s.extraLeaves=0}
+function grow(n){if(!s.broken)delta({leaves:n})}
 function beginStage(){
  const before=measure();s.leggy=false;s.snailBite=false;s.flags={};s.jobUsed=0;s.queue=[...D.stages[s.stage].fixed];s.idx=0;s.triggered=false;s.stageGrowthDone=false;s.task=null;s.spec=null;s.result=null;s.boss=null;s.rescueKeys=null;s.stageStart=measure();s.stagePlant=copy({vigor:s.vigor,root:s.root,leaves:s.leaves,cap:s.cap,pests:s.pests,disease:s.disease,weed:s.weed,virus:s.virus,stage:s.stage,fruit:s.fruit,training:s.training,planted:s.planted,doubleStarted:s.doubleStarted,broken:s.broken});
  delta(s.deferred);s.deferred={pests:0,disease:0};s.weed=clamp(s.weed+R.weedGrowth,R.weedStart,R.weedMax);
  if(s.training==='double')delta({disease:R.doubleDisease});
  if(s.stage===0){s.flags.snail=Math.random()<R.snailChance}
  s.flags.pestAtStart=s.pests>=R.pestTrigger;s.flags.diseaseAtStart=s.disease>=R.diseaseTrigger;
- if(s.stage>0){const days=D.seasons[s.season];grow(s.stage===1?days[3]*R.leafPerDay:0)}
+ if(s.stage>0){const days=D.seasons[s.season];grow((s.stage===1?days[3]*R.leafPerDay:0)+s.extraLeaves);s.extraLeaves=0}
  s.view='period';s.checkpoint=snapshot();save();render();
 }
 function retry(){
@@ -156,7 +182,7 @@ function ignore(){
  }else if(id==='C-1'){delta({leaves:-R.ignoredLeafLoss,virus:R.ignoredVirus});s.deferred.pests+=R.ignoredRise}
  else if(id==='C-2'){delta({leaves:-R.ignoredLeafLoss});s.deferred.disease+=R.ignoredRise}
  else if(id==='C-3')delta({pests:s.weed*R.weedPest});
- simpleResult('先不處理',id==='1-4'?'蝸牛夜裡會再出來，下一關要小心。':'這次先略過，影響會記在田間紀錄。');
+ const [title,detail]=D.skipped[id];simpleResult(title,detail);
 }
 function classify(id,bag){
  const spec=F[id], [n,p,k]=bag.values,a=p/n,b=k/n;
@@ -199,7 +225,8 @@ function simpleResult(title,detail){
 }
 function settleScore(score){
  if(s.view!=='ready'&&s.view!=='playing')return;
- const id=s.task;let detail='',title=names[id]||s.spec.title;
+ const id=s.task;const extraBefore=s.extraLeaves;let detail='',title=names[id]||s.spec.title;
+ const leafReward=()=>s.extraLeaves>extraBefore?' 下個栽培階段多長 '+(s.extraLeaves-extraBefore)+' 片葉。':'';
  if(s.fertId&&['1-1','3-3','5-3'].includes(id)){
   const spec=F[s.fertId],type=s.flags[s.fertId];
   if(type==='correct'){let mult=F.multipliers.find(b=>score>=b[0])[1];delta(Object.fromEntries(Object.entries(spec.gain).map(([k,v])=>[k,v*mult])));detail='配方正確，效果 ×'+mult+'。'}
@@ -232,9 +259,9 @@ function settleScore(score){
    s.fruit=Math.random()*100<s.setChance;
    detail=s.fruit?'花坐住了！':'花掉了，瓜沒坐住。';
   }
-  const record=note(id,title,s.taskBefore,score,detail);s.result={title,score,detail,changes:record.changes};screen('bossOutcome');return;
+  detail+=leafReward();const record=note(id,title,s.taskBefore,score,detail);s.result={title,score,detail,changes:record.changes};screen('bossOutcome');return;
  }
- const record=note(id,title,s.taskBefore,score,detail);s.result={title,score,detail:detail||'這一步做完了，看看植株的變化。',changes:record.changes};screen('feedback');
+ detail+=leafReward();const record=note(id,title,s.taskBefore,score,detail);s.result={title,score,detail:detail||'這一步做完了，看看植株的變化。',changes:record.changes};screen('feedback');
 }
 function bossIntro(){
  const id=s.task,b=D.bosses[id],reasons=[];s.taskBefore=measure();
@@ -278,11 +305,13 @@ function advanceStage(){
  if(s.stage===1){s.log.push({id:'4-B',title:'摘心期自動帶過',stage:s.stage,score:R.autoTopScore,changes:{},impact:0,detail:'自動 '+R.autoTopScore+' 分，生長勢上限提升至 '+Math.round(R.caps[3]*100)+'%'});s.cap=capFor(3)}s.stage++;beginStage();
 }
 function rescue(yes){
- const before=measure();if(yes&&s.coins<R.rescuePrice)return;s.rescueUsed++;
+ const before=measure();if(yes&&s.coins<R.rescuePrice)return;
+ if(yes)s.rescueUsed++;
+ else {s.rescueDeclined??={};for(const key of s.rescueKeys)s.rescueDeclined[key]=key==='leaves'?area():s[key];}
  if(yes){if(!pay(R.rescuePrice))return;for(const k of s.rescueKeys){if(k==='leaves')s.leaves=clamp(Math.ceil(limit()*R.rescueTo/100),0,limit());else s[k]=k==='vigor'?Math.min(s.cap,R.rescueTo):R.rescueTo}}
  note('C-6',yes?'緊急補救':'放棄補救',before,null);
  const ret=s.rescueReturn;s.rescueKeys=null;s.rescueReturn=null;
- if(s.vigor<=0||s.root<=0||(s.planted&&s.leaves<=0)){failure(s.stage===0?'苗被啃光了':'植株撐不住了','出現警訊時要及時補救。','C-6');return}
+ if(s.vigor<=0||s.root<=0||(s.planted&&s.leaves<=0)){plantFailure();return}
  if(ret==='bossResult'||ret==='stageEndPending')stageEnd();else if(ret==='period'){screen('period')}else next();
 }
 function bars(){
@@ -296,7 +325,7 @@ function changes(c,includeHidden=false,precise=false){
  return '<div class="changes">'+keys.filter(k=>k!=='coins'&&k!=='tstem').map(k=>{let v=c[k]||0,positive=['pests','disease','virus','weed'].includes(k)?v<0:v>0;return '<div><span>'+labels[k]+'</span><b class="'+(v===0?'same':positive?'up':'down')+'">'+(v>0?'↑':v<0?'↓':'—')+(precise&&v?' '+(v>0?'+':'')+v:'')+'</b></div>'}).join('')+'</div>'
 }
 function ranked(count,stageOnly=false){
- const log=s.log.filter(x=>!stageOnly||x.stage===s.stage);
+ const log=s.log.filter(x=>Object.keys(x.changes).length>0&&(!stageOnly||x.stage===s.stage));
  const best=log.filter(x=>x.impact>0).sort((a,b)=>b.impact-a.impact).slice(0,count),worst=log.filter(x=>x.impact<0).sort((a,b)=>a.impact-b.impact).slice(0,count);
  const list=(a)=>a.length?a.map(x=>'<div class="decision"><b>'+esc(x.title)+'</b><small>'+esc(x.score==null?'':x.score+' 分　')+esc(x.detail||Object.entries(x.changes).map(([k,v])=>labels[k]+' '+(v>0?'↑':'↓')).join('、'))+'</small></div>').join(''):p('本階段無明顯變化');
  return '<h3>幫最多的決定</h3>'+list(best)+'<h3>傷最大的決定</h3>'+list(worst);
@@ -343,12 +372,12 @@ function render(){
   h+=bossView();schedule(()=>{app.querySelector('.arrival')?.classList.add('settled')},s.boss.repeat?R.repeatIntro:R.intro);
  }else if(s.view==='bossOutcome'){h+=bossView(true);schedule(()=>screen('bossResult'),R.defeat)}
  else if(s.view==='bossResult'){
-  const b=D.bosses[s.boss.id];h+=heading('Boss 結算',b.name)+'<div class="score">'+s.boss.score+' 分</div>'+p((s.boss.score>=R.bossPerfect?'完美擊破！':s.boss.score>=R.bossWin?'擊敗！':'被牠跑了…')+'　剩 '+s.boss.remaining+' HP')+changes(s.result.changes)+lesson(b.lesson)+(s.task==='B-5'?p(s.fruit?'有坐果！':'花掉了，沒有坐果。'):'')+htmlButton('階段結算','afterBoss');
+  const b=D.bosses[s.boss.id];h+=heading('Boss 結算',b.name)+'<div class="score">'+s.boss.score+' 分</div>'+p((s.boss.score>=R.bossPerfect?'完美擊破！':s.boss.score>=R.bossWin?'擊敗！':'被牠跑了…')+'　剩 '+s.boss.remaining+' HP')+changes(s.result.changes)+lesson(b.lesson)+(s.result.detail&&s.task!=='B-5'?p(s.result.detail):'')+(s.task==='B-5'?p(s.fruit?'有坐果！':'花掉了，沒有坐果。'):'')+htmlButton('階段結算','afterBoss');
  }else if(s.view==='rescue'){
-  h+=heading('植株警訊','瓜苗撐不住了')+field()+p(s.rescueKeys.map(k=>labels[k]).join('、')+'太低，這局還有一次補救機會。')+htmlButton('補救　◉ '+R.rescuePrice,'rescueYes',s.coins<R.rescuePrice)+htmlButton('先不補救','rescueNo',false,true);
+  h+=heading('植株警訊','瓜苗撐不住了')+field()+p(s.rescueKeys.map(k=>labels[k]).join('、')+'太低，這局還有一次補救機會。')+(s.rescueKeys.includes('vigor')&&s.cap<R.rescueTo?p('這個階段的生長勢最多補到 '+s.cap+'。'):'')+htmlButton('補救　◉ '+R.rescuePrice,'rescueYes',s.coins<R.rescuePrice)+htmlButton('先不補救','rescueNo',false,true);
  }else if(s.view==='stageEnd'){
   const c=s.stageResults.at(-1).changes;
-  h+=heading('階段結算',stage.name+'・完成')+'<div class="compare"><div><small>階段開始</small>'+StageArt.plant(s.stagePlant)+'</div><div><small>現在</small>'+StageArt.plant(s)+'</div></div>'+bars()+changes(c)+ranked(1,true)+p(s.vigor>=s.cap*.7?'長勢不錯，接著顧好下一段。':'瓜苗還在努力，下一段要更用心。')+'<div class="capNotice">生長勢上限提升</div>'+htmlButton(s.stage===2?'看試玩結果':D.stages[s.stage+1].name+'・下一關','advance');
+  h+=heading('階段結算',stage.name+'・完成')+'<div class="compare"><div><small>階段開始</small>'+StageArt.plant(s.stagePlant)+'</div><div><small>現在</small>'+StageArt.plant(s)+'</div></div>'+bars()+changes(c)+ranked(1,true)+p(s.vigor>=s.cap*R.strongRatio?'長勢不錯，接著顧好下一段。':'瓜苗還在努力，下一段要更用心。')+'<div class="capNotice">生長勢上限提升</div>'+htmlButton(s.stage===2?'看試玩結果':D.stages[s.stage+1].name+'・下一關','advance');
  }else if(s.view==='end'){
   const c={};for(const r of s.stageResults)for(const [k,v] of Object.entries(r.changes))c[k]=(c[k]||0)+v;if(s.fail&&s.stageResults.length<=s.stage){for(const [k,v] of Object.entries(measure()))c[k]=(c[k]||0)+v-s.stageStart[k];}
   h+=heading(s.fail?'本局結束':'試玩完成',s.fail?s.fail.reason:'瓜坐住了！')+field()+(s.fail?lesson(s.fail.teaching):p('你已經通過幼苗、抽藤、授粉三關。'))+p('著果：'+(s.fruit===true?'成功':s.fruit===false?'未著果':'尚未進入著果判定'))+changes(c,false)+ranked(2)+p('正式版敬請期待')+(s.fail?htmlButton('從該階段開頭重來','retry',s.retryUsed>=R.retryCount||!s.checkpoint):'')+htmlButton('重新開始','home',false,true);

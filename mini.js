@@ -5,9 +5,9 @@ const StageMini=(()=>{
  const shuffle=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
  const sequence=()=>shuffle(Array.from({length:9},(_,i)=>i));
  let g=null, frame=0, held=false,lastCell=-1,done=null, host=null, state={step:'arc',daily:{}}, miniTimer=0, jobCache={};
- const T={targets:8,decoys:2}; // M-1、M-2 既有原型目標
+ const T={targets:rules.jobTargets,decoys:rules.jobDecoys}; // M-1、M-2 既有原型目標
  // 以下為舊打工模組的局部相容介面，不讀寫逐日存檔
- const D={job:{seconds:rules.seconds,penalty:.1,maximum:rules.jobMax},jobs:[
+ const D={job:{seconds:rules.seconds,penalty:rules.jobPenalty,maximum:rules.jobMax},jobs:[
  {id:'M-1',name:'鋤草',hint:'往上滑拔草，避開瓜苗。'},
  {id:'M-2',name:'幫鄰居採小黃瓜',hint:'採剛好的瓜與過老瓜，太小的留著。'},
  ...[[6,'市場理貨','照出貨單找蔬果。',5],[7,'蔬果箱打包','記住訂單和數量。',3],[8,'幫鄰田巡田','記住有病斑的位置。',4],[9,'市場收錢找零','算出該找多少錢。',5],[10,'數瓜入庫','看清楚瓜籃的數量。',4],[11,'蔬果箱裝箱拼圖','旋轉貨品並放入箱格。',1]].map(([n,name,hint,questions])=>({id:'M-'+n,name,hint,questions}))]};
@@ -144,7 +144,7 @@ function legacyPlayCell(g,i){
     case 'order':case 'trail':if(pos===g.stage)mark();else if(!g.marks.includes(i))g.miss++;break;
     case 'find':case 'guard':if(i===arcTarget(g)){g.hit++;g.stage++;}else g.miss++;break;
     case 'node':if(pos===0)g.hit++;else g.miss++;break;
-    case 'timing':if(t-(g.lastTap??-1)<rules.timingGap)return;g.lastTap=t;if(Math.abs(oscillate(g,t)-.5)<rules.timingWidth)g.hit++;else g.miss++;break;
+    case 'timing':if(t-(g.lastTap??-1)<rules.timingGap)return;g.lastTap=t;g.attempts++;if(Math.abs(oscillate(g,t)-.5)<rules.timingWidth)g.hit++;else g.miss++;break;
     case 'net':case 'balance':g.knob=clamp(g.knob+(i%3===0?-.065:.065),0,1);break;
     case 'pipes':if(i<3||i>5)return;g.values[i-3]++;g.hit=g.values.filter((v,j)=>(v+g.sequence[j+3])%4===0).length;break;
     case 'portion':if(i<2)g.power=i+1;else if(i>=3&&i<=5){const j=i-3;g.values[j]+=g.power;if(g.values[j]>i-1){g.values[j]=0;g.miss++;}g.hit=g.values.filter((v,j)=>v===j+2).length;}break;
@@ -327,7 +327,7 @@ function hit(slot) {
    c.fillStyle='#e9efd9';c.fillRect(0,0,w,h);
    if(g.mode==='flash'){
      c.fillStyle='#172721';c.fillRect(0,0,w,h);
-     c.save();c.beginPath();c.arc(g.player[0]*w,g.player[1]*h,75,0,Math.PI*2);c.clip();c.fillStyle='#657f4d';c.fillRect(0,0,w,h);
+     c.save();c.beginPath();c.arc(g.player[0]*w,g.player[1]*h,rules.flashLight,0,Math.PI*2);c.clip();c.fillStyle='#657f4d';c.fillRect(0,0,w,h);
      for(let i=0;i<9;i++){let x=(i%3+.5)*120,y=(Math.floor(i/3)+.5)*h/3;circle(x,y,27,'#375a35');}
      let [x,y]=snailPos(g);circle(x*w,y*h,18,'#c09263');label('蝸',x*w,y*h+5,'#372d20');
      for(let i=0;i<g.extra;i++){let p=g.sequence[(g.stage+i+1)%9];circle((p%3+.5)*120,(Math.floor(p/3)+.5)*h/3,9,'#b2a374')}
@@ -349,19 +349,23 @@ function hit(slot) {
  }
  function customTouch(g,x,y,down){
    if(g.mode==='flash'){
-     g.player=[x,y];let p=snailPos(g);if(Math.hypot(x-p[0],y-p[1])<.085&&g.lastSnail!==g.stage){g.lastSnail=g.stage;g.hit++;g.stage++;if(g.stage%9===0)g.sequence=sequence();}
+     g.player=[x,y];let p=snailPos(g);if(Math.hypot(x-p[0],y-p[1])<rules.flashHitRadius&&g.lastSnail!==g.stage){g.lastSnail=g.stage;g.hit++;g.stage++;if(g.stage%9===0)g.sequence=sequence();}
    }else if(g.mode==='wire'){
      g.player=[x,y];let p=points(g),i=g.stage;
-     if(i===0){if(Math.hypot(x-p[0][0],y-p[0][1])<.12)g.stage=1;return}
+     if(i===0){if(Math.hypot(x-p[0][0],y-p[0][1])<rules.wireTolerance)g.stage=1;return}
      let [a,b]=p[i-1], [d,e]=p[Math.min(i,p.length-1)];let dx=d-a,dy=e-b,k=clamp(((x-a)*dx+(y-b)*dy)/(dx*dx+dy*dy||1),0,1);
-     if(Math.hypot(x-a-k*dx,y-b-k*dy)>.12){g.miss++;g.stage=0;g.toast='碰到邊了！從起點再來';return}
-     if(Math.hypot(x-d,y-e)<.085){g.hit++;g.stage=Math.min(g.goal,g.stage+1)}
+     if(Math.hypot(x-a-k*dx,y-b-k*dy)>rules.wireTolerance){g.miss++;g.stage=0;g.toast='碰到邊了！從起點再來';return}
+     if(Math.hypot(x-d,y-e)<rules.wireHitRadius){g.hit=Math.max(g.hit,i);g.stage=i+1}
    }else if(g.mode==='catch'){g.player=[x,.87]}
    else if(g.mode==='cut'&&down){let t=arcTime(g);if(t-(g.lastTap??-1)<rules.timingGap)return;g.lastTap=t;if(Math.abs(oscillate(g,t)-.5)<rules.timingWidth)g.hit++;else g.miss++}
  }
  function fallingFrame(g,t,dt){
-   if(t>=g.nextDrop){g.nextDrop=t+.58;g.falling.push({x:.12+Math.random()*.76,y:0,bad:g.extra>0&&g.drop++%(Math.max(3,8-g.extra))===0});}
-   for(const o of g.falling){o.y+=dt*.65;if(o.y>.79&&o.y<.96&&Math.abs(o.x-g.player[0])<.12){if(o.bad){g.miss++;g.toast='碰到農藥滴！'}else g.hit++;o.y=2}}
+   const drop=bad=>g.falling.push({x:.12+Math.random()*.76,y:0,bad});
+   if(t>=g.nextDrop){g.nextDrop=t+rules.dropInterval;drop(false)}
+   while(g.poisonDrops<g.extra&&t>=g.duration*(rules.beePoisonFirst+g.poisonDrops*rules.beePoisonSpacing)){
+     drop(true);g.poisonDrops++;
+   }
+   for(const o of g.falling){o.y+=dt*rules.dropSpeed;if(o.y>.79&&o.y<.96&&Math.abs(o.x-g.player[0])<rules.catchRadius){if(o.bad){g.miss++;g.toast='碰到農藥滴！'}else g.hit++;o.y=2}}
    g.falling=g.falling.filter(o=>o.y<1.1);
  }
  function finish(scoreValue){
@@ -372,7 +376,7 @@ function hit(slot) {
    if(g.mode==='balance'){g.knob=clamp(g.knob+dt*.10*Math.sin(t*(1.4+g.variant*.09)+g.variant+.7),0,1);g.totalTime+=dt;if(Math.abs(g.knob-waterTarget(g,t))<=targetWidth(g))g.goodTime+=dt;}
    if(g.mode==='plane')flyFrame(g,t,dt);
    if(g.mode==='catch')fallingFrame(g,t,dt);
-   if(t>=g.duration||g.hit>=g.goal){finish(score(g));return}
+   if(t>=g.duration||g.hit>=g.goal||(g.kind==='feed'&&g.mode==='timing'&&g.attempts>=rules.pourAttempts)){finish(score(g));return}
    if(custom.has(g.mode))drawCustom(g,t);else drawArc(g,t);
    let el=document.getElementById('arcClock');if(el)el.textContent='剩 '+Math.ceil(g.duration-t)+' 秒';
    el=document.getElementById('arcScore');if(el)el.textContent='操作 '+score(g)+' 分';
@@ -392,9 +396,9 @@ function hit(slot) {
    stop();host=hostEl;done=onDone;
    if(spec.job){startJob(spec.job);return}
    const [kind,mode]=spec.mode.split('/');
-   const base=rules.targets[mode]||1,goal=(spec.hp?Math.max(1,Math.round(base*spec.hp/rules.bossBase)):base)+(mode==='flash'?spec.extra||0:0);
+   const base=kind==='feed'&&mode==='timing'?rules.pourAttempts:rules.targets[mode]||1,goal=(spec.hp?Math.max(1,Math.round(base*spec.hp/rules.bossBase)):base)+(mode==='flash'?spec.extra||0:0);
    const duration=spec.hp?rules.bossSeconds:rules.seconds*rules.difficultyTime[(spec.difficulty||3)-1];
-   g={kind,mode,title:spec.title,hint:spec.hint,label:spec.label||spec.title,variant:spec.variant||0,context:{id:'pest'+(spec.variant%3||0),value:1},goal,duration,green:spec.green||.14,hp:spec.hp||0,extra:spec.extra||0,sequence:sequence(),start:Date.now(),elapsed:0,hit:0,miss:0,marks:[],stage:0,values:[0,0,0],knob:.5,player:[.5,.82],shots:[],hazards:[],nextShot:0,nextHazard:0,frame:0,goodTime:0,totalTime:0,power:1,falling:[],nextDrop:0,drop:0,heal:0};
+   g={kind,mode,title:spec.title,hint:spec.hint,label:spec.label||spec.title,variant:spec.variant||0,context:{id:'pest'+(spec.variant%3||0),value:1},goal,duration,green:spec.green||.14,hp:spec.hp||0,extra:spec.extra||0,sequence:sequence(),start:Date.now(),elapsed:0,hit:0,miss:0,marks:[],stage:0,values:[0,0,0],knob:.5,player:[.5,.82],shots:[],hazards:[],nextShot:0,nextHazard:0,frame:0,goodTime:0,totalTime:0,power:1,falling:[],nextDrop:0,poisonDrops:0,attempts:0,heal:0};
    state.daily.arc=g;
    host.innerHTML=(g.hp?'<div class="fightStatus"><div class="hp"><i id="fightHp"></i></div><span id="fightHpText">'+g.hp+' HP</span></div>':'')+'<div class="arcStatus"><b id="arcClock"></b><b id="arcScore"></b></div><canvas id="farmCanvas" width="360" height="320" aria-label="'+escapeHTML(spec.title)+'"></canvas><p id="arcToast" aria-live="polite"></p>';
    const canvas=document.getElementById('farmCanvas');canvas.addEventListener('pointerdown',pointer);canvas.addEventListener('pointermove',pointer);for(const e of ['pointerup','pointercancel','lostpointercapture'])canvas.addEventListener(e,()=>{held=false;lastCell=-1});tick();

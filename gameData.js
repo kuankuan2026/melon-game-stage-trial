@@ -39,7 +39,10 @@ const D = globalThis.StageData = {
     seconds:10, bossSeconds:12, wireTolerance:.12, wireHitRadius:.085, flashHitRadius:.085, flashLight:75, dropInterval:.58, dropSpeed:.65, catchRadius:.12, // 新玩法手感暫定，均可調
      missPenalty:.35, memoryShow:2.6, // 操作暫定
     greenByDifficulty:[1.2,1.1,1,.9,.8], jobPenalty:.1, jobTargets:8,jobDecoys:2, // 難度綠區倍率暫定；M-1/2 沿用逐日
-     timingWidth:.15, timingGap:.35,
+    timingWidth:.15, timingGap:.35, // 藤夾、倒肥停手操作暫定
+    pourAttempts:4, // FZ-4
+    beePoisonFirst:0, beePoisonSpacing:.15, // 5-1：藥滴自開場分散至戰鬥前段，出場節奏暫定
+    virusVisible:40, // 階段關卡 95 列：病毒顯示門檻暫定
     targets:{paint:9,slice:5,avoid:5,memory:4,order:5,trail:5,timing:4,find:3,scale:2,balance:7,plane:10,flash:6,cut:4,wire:5,catch:6},
     difficultyTime:[1.1,1.05,1,.95,.9], // 品種難度 1～5；暫定
     seasonsGreen:[.13,.14,.14,.14,.14,.13,.12,.14], // 63列；暫定
@@ -87,6 +90,14 @@ const D = globalThis.StageData = {
     '3-2':['摘除側芽','prune','剪掉側芽，保留主蔓','leaves'], // 3-2
     '3-3':['施肥','FZ-3'], '5-1':['授粉方式'], '5-2':['結果蔓摘心','fruitTip','保留結果蔓的葉片，剪掉頂芽','set','tstem'], '5-3':['施肥','FZ-4'], // 5-1～3
     'C-1':['防治：蟲'], 'C-2':['防治：病'], 'C-3':['除草'], 'C-5':['打工'], 'C-6':['補救']
+  },
+  skipped:{
+    '1-3':['沒補苗','空穴沒補，生長勢下降。'],
+    '1-4':['沒抓蝸牛','蝸牛啃掉一片葉，下場 Boss 會更難打。'],
+    'C-1':['沒處理蟲害','掉一片葉，病毒增加，下階段蟲害也會加重。'],
+    'C-2':['沒處理病害','掉一片葉，下階段病害會加重。'],
+    'C-3':['沒除草','雜草越多，蟲害增加越多。'],
+    'C-5':['這次不打工','這個階段沒有打工收入。'],
   },
   fertilizer:{
     price:40, tolerance:.15,jitter:.10,nMin:8,nMax:15, distractorGap:.30, classicLimit:.5, classicRatio:[.15,.4], classicK:[.6,2.1], // 17列；生成區間暫定
