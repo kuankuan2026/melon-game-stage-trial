@@ -7,6 +7,8 @@
 <link rel="stylesheet" href="art-test.css">
 <script src="sprites.js" defer></script>
 <script src="mascots.js" defer></script>
+<script src="guanguan.js" defer></script>
+<script src="boss.js" defer></script>
 </head>
 <body>
 <header class="top"><div><strong>植日生</strong><span>洋香瓜遊戲</span></div><a href="#palette">看色票</a></header>
@@ -50,6 +52,28 @@
 <div class="mascot-dialogue">
 <canvas width="48" height="45" data-mascot="guaji" style="--mascot-width:144px;--mascot-height:135px" aria-hidden="true"></canvas>
 <p>我是瓜吉，今天也一起顧瓜吧！</p>
+</div>
+</section>
+<section class="panel guanguan-demo" aria-labelledby="guanguan-demo-title">
+<h2 id="guanguan-demo-title">冠冠小教室</h2>
+<div class="mascot-dialogue">
+<canvas width="44" height="56" data-guanguan aria-hidden="true"></canvas>
+<p>我是冠冠，有問題舉手問我！</p>
+</div>
+</section>
+<section class="panel boss-demo" aria-labelledby="boss-demo-title">
+<h2 id="boss-demo-title">最終大魔王：終焉農夫・筋肉魔導冠皇GG改</h2>
+<div class="boss-demo-grid">
+<figure>
+<figcaption>一階段</figcaption>
+<canvas width="56" height="64" data-boss-gg="1" aria-hidden="true"></canvas>
+<div class="boss-demo-hp"><span>第一條血</span></div>
+</figure>
+<figure>
+<figcaption>二階段</figcaption>
+<canvas width="56" height="64" data-boss-gg="2" aria-hidden="true"></canvas>
+<div class="boss-demo-hp"><span>第二條血</span></div>
+</figure>
 </div>
 </section>
 <section class="hero" aria-labelledby="title">
@@ -103,6 +127,10 @@
 document.addEventListener("DOMContentLoaded", () => {
   for (const canvas of document.querySelectorAll("[data-mascot]")) {
     drawMascot(canvas, canvas.dataset.mascot);
+  }
+  drawGuanguan(document.querySelector("[data-guanguan]"));
+  for (const canvas of document.querySelectorAll("[data-boss-gg]")) {
+    drawBossGG(canvas, Number(canvas.dataset.bossGg));
   }
 });
 </script>
